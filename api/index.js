@@ -3,7 +3,7 @@ dotenv.config();
 
 import express from 'express';
 import mongoose from 'mongoose';
-
+import userRouter from "./routes/user.route.js"
 console.log('MongoDB URI:', process.env.MONGO); // Should print the URI
 
 mongoose.connect(process.env.MONGO, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -24,3 +24,5 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+app.use('/api/user',userRouter)
