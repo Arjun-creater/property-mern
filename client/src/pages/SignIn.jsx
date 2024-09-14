@@ -1,29 +1,30 @@
-/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { signInStart, signInSuccess, signInFailure } from '../redux/user/userSlice';
 
-export default function SignUp() {
+export default function SignIn() {
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: ''
   });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+
+  const { loading, error } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
+    let value = e.target.value.trim();
     setFormData({
       ...formData,
-      [e.target.id]: e.target.value,
+      [e.target.id]: value
     });
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Corrected typo
-    setLoading(true);
-    setError(null); // Clear any previous error
+    e.preventDefault();
     try {
+      dispatch(signInStart());
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
@@ -32,55 +33,50 @@ export default function SignUp() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
+      console.log(data);
       if (data.success === false) {
-        setError(data.message);
-        setLoading(false);
+        dispatch(signInFailure(data.message));
         return;
       }
-      setLoading(false);
-      console.log(data);
-      navigate('/'); // Redirect on success
-    } catch (err) {
-      setError('An unexpected error occurred.');
-      setLoading(false);
+      dispatch(signInSuccess(data));
+      navigate('/');
+    } catch (error) {
+      dispatch(signInFailure(error.message));
     }
   };
-
-  console.log(formData);
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl text-center font-semibold my-7'>Sign In</h1>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-       
+      <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
         <input
-          type='email'
-          placeholder='email'
+          placeholder='Email'
           className='border p-3 rounded-lg'
           id='email'
           onChange={handleChange}
+          value={formData.email}
         />
         <input
           type='password'
-          placeholder='password'
+          placeholder='Password'
           className='border p-3 rounded-lg'
           id='password'
           onChange={handleChange}
+          value={formData.password}
         />
-        {error && <p className="text-red-500">{error}</p>}
         <button
           disabled={loading}
-          className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
-        >
-          {loading ? 'loading...' : 'Sign In'}
+          className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'>
+          {loading ? 'Loading...' : 'Sign In'}
         </button>
       </form>
       <div className='flex gap-2 mt-5'>
-        <p> Dont Have an account?</p>
+        <p>Don't have an account?</p>
         <Link to={"/sign-up"}>
-          <span className='text-blue-700'>Sign up</span>
+          <span className='text-blue-700'>Sign Up</span>
         </Link>
       </div>
+      {error && <p className='text-red-500 mt-5'>{error}</p>}
     </div>
   );
 }
