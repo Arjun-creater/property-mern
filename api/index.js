@@ -5,6 +5,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import userRouter from "./routes/user.route.js"
 import authRouter from './routes/auth.route.js'
+import cookieParser from 'cookie-parser';
 console.log('MongoDB URI:', process.env.MONGO); // Should print the URI
 
 mongoose.connect(process.env.MONGO, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -20,6 +21,7 @@ mongoose.connect(process.env.MONGO, { useNewUrlParser: true, useUnifiedTopology:
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser())
 
 const PORT = process.env.PORT || 4000;
 
